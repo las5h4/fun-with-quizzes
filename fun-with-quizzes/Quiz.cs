@@ -10,29 +10,22 @@ namespace fun_with_quizzes
 
         public static void Main(string[] args)
         {
-            string answers = "ABCD";
-            string answer = "BD";
-            bool contains = answers.Contains(answer);
-            Console.WriteLine(contains);
+            MultipleChoiceQuestion aMultipleChoiceQuestion = new MultipleChoiceQuestion("What language are we learning in unit 2?", "javascript", "java", "C#", "python", "C");
+            TrueOrFalseQuestion aTrueOrFalseQuestion = new TrueOrFalseQuestion("C# is a fun language to learn", "TRUE");
+            CheckboxQuestion aCheckboxQuestion = new CheckboxQuestion("Which of the following are types of birds?", "Housecat", "Parrot", "Cobra", "Chicken", "BD");
 
-            string input = InitialPrompt();
+            Questions.Add(aMultipleChoiceQuestion);
+            Questions.Add(aTrueOrFalseQuestion);
+            Questions.Add(aCheckboxQuestion);
 
-            if (input.Equals("0"))
-            {
-
-            }
-
-            if (input.Equals("1"))
-            {
-                AddQuestion();
-            }
+            InitialPrompt();
         }
 
         public Quiz()
         {
         }
 
-        public static string InitialPrompt()
+        public static void InitialPrompt()
         {
             Console.WriteLine("Welcome to Logan's Quiz! What would you like to do?\n0 - Take the quiz\n1 - Add a question to the quiz");
             string input = Console.ReadLine();
@@ -41,7 +34,44 @@ namespace fun_with_quizzes
                 Console.WriteLine("Invalid input.");
                 InitialPrompt();
             }
-            return input;
+
+            if (input.Equals("0"))
+            {
+                RunQuiz();
+            }
+
+            if (input.Equals("1"))
+            {
+                AddQuestion();
+            }
+        }
+
+        public static string GradeQuiz(double score, double questionNumber)
+        {
+            double percent = Math.Round((score / questionNumber) * 100);
+            return $"**********\n**********\n\nGRADE:\n{score} out of {questionNumber}\n{percent}%\n\n**********\n**********";
+        }
+
+        public static void RunQuiz()
+        {
+            Console.WriteLine("**********\n**********\n\nQUIZ TIME!!!\n\n**********\n**********\n");
+
+            double questionNumber = 0;
+            double score = 0;
+
+            foreach (Question question in Questions)
+            {
+                questionNumber++;
+                Console.WriteLine($"{question.GetQuestionType()}\n{questionNumber}.) {question.QuestionBody}\n{question.PrintOptions()}");
+                question.UserAnswer = question.GetAnswer();
+                if (question.UserAnswer.ToUpper().Equals(question.CorrectAnswer.ToUpper()))
+                {
+                    score++;
+                }
+            }
+            Console.WriteLine(GradeQuiz(score, questionNumber));
+
+            InitialPrompt();
         }
 
         public static void AddQuestion()
@@ -67,23 +97,8 @@ namespace fun_with_quizzes
 
                     Console.WriteLine("Please type your question:");
                     newMultipleChoiceQuestion.QuestionBody = Console.ReadLine();
-                    Console.WriteLine("Please type option A:");
-                    newMultipleChoiceQuestion.OptionA = Console.ReadLine();
-                    Console.WriteLine("Please type option B:");
-                    newMultipleChoiceQuestion.OptionB = Console.ReadLine();
-                    Console.WriteLine("Please type option C:");
-                    newMultipleChoiceQuestion.OptionC = Console.ReadLine();
-                    Console.WriteLine("Please type option D:");
-                    newMultipleChoiceQuestion.OptionD = Console.ReadLine();
-                    Console.WriteLine("Please enter the letter of the correct option");
-                    string correctAnswer = Console.ReadLine();
-                    string[] answers = { "A", "B", "C", "D" };
-                    while (!answers.Contains(correctAnswer.ToUpper()))
-                    {
-                        Console.WriteLine("Invalid input. Enter A, B, C, or D:");
-                        correctAnswer = Console.ReadLine();
-                    }
-                    newMultipleChoiceQuestion.CorrectAnswer = correctAnswer;
+                    newMultipleChoiceQuestion.AddOptions();
+                    newMultipleChoiceQuestion.CorrectAnswer = newMultipleChoiceQuestion.GetAnswer();
                     Questions.Add(newMultipleChoiceQuestion);
 
                     InitialPrompt();
@@ -96,14 +111,7 @@ namespace fun_with_quizzes
                     Console.WriteLine("Please type your true-or-false statement:");
                     newTrueOrFalseQuestion.QuestionBody = Console.ReadLine();
                     Console.WriteLine("What is the correct answer? Please type TRUE or FALSE:");
-                    string correctAnswer = Console.ReadLine();
-                    string[] answers = { "TRUE", "FALSE" };
-                    while (!answers.Contains(correctAnswer.ToUpper()))
-                    {
-                        Console.WriteLine("Invalid input. Enter TRUE or FALSE:");
-                        correctAnswer = Console.ReadLine();
-                    }
-                    newTrueOrFalseQuestion.CorrectAnswer = correctAnswer;
+                    newTrueOrFalseQuestion.CorrectAnswer = newTrueOrFalseQuestion.GetAnswer();
                     Questions.Add(newTrueOrFalseQuestion);
 
                     InitialPrompt();
@@ -115,41 +123,50 @@ namespace fun_with_quizzes
 
                     Console.WriteLine("Please type your question:");
                     newCheckboxQuestion.QuestionBody = Console.ReadLine();
-                    Console.WriteLine("Please type option A:");
-                    newCheckboxQuestion.OptionA = Console.ReadLine();
-                    Console.WriteLine("Please type option B:");
-                    newCheckboxQuestion.OptionB = Console.ReadLine();
-                    Console.WriteLine("Please type option C:");
-                    newCheckboxQuestion.OptionC = Console.ReadLine();
-                    Console.WriteLine("Please type option D:");
-                    newCheckboxQuestion.OptionD = Console.ReadLine();
+                    newCheckboxQuestion.AddOptions();
+                    //Console.WriteLine("Please type option A:");
+                    //newCheckboxQuestion.OptionA = Console.ReadLine();
+                    //Console.WriteLine("Please type option B:");
+                    //newCheckboxQuestion.OptionB = Console.ReadLine();
+                    //Console.WriteLine("Please type option C:");
+                    //newCheckboxQuestion.OptionC = Console.ReadLine();
+                    //Console.WriteLine("Please type option D:");
+                    //newCheckboxQuestion.OptionD = Console.ReadLine();
 
-                    string correctAnswer = "";
-                    while (correctAnswer.Length <= 1)
-                    {
-                        Console.WriteLine("Please enter the letters of the correct options");
-                        string correctAnswerInput = Console.ReadLine().ToUpper();
-                        correctAnswer = "";
-                        string answers = "aAbBcCdD";
-                        foreach (char character in correctAnswerInput)
-                        {
-                            if (!correctAnswer.Contains(character) && answers.Contains(character))
-                            {
-                                correctAnswer += character;
-                            }
-                        }
-                        if (correctAnswer.Length <= 1)
-                        {
-                            Console.WriteLine("Invalid input. Checkbox questions MUST have more than one answer and answers must be A, B, C, and/or D.");
-                        }
-                    }
-                    newCheckboxQuestion.CorrectAnswer = correctAnswer;
+                    //string correctAnswer = "";
+                    //while (correctAnswer.Length <= 1)
+                    //{
+                    //    Console.WriteLine("Please enter the letters of the correct options");
+                    //    string correctAnswerInput = Console.ReadLine().ToUpper();
+                    //    correctAnswer = "";
+                    //    string answers = "aAbBcCdD";
+                    //    foreach (char character in correctAnswerInput)
+                    //    {
+                    //        if (!correctAnswer.Contains(character) && answers.Contains(character))
+                    //        {
+                    //            correctAnswer += character;
+                    //        }
+                    //    }
+                    //    if (correctAnswer.Length <= 1)
+                    //    {
+                    //        Console.WriteLine("Invalid input. Checkbox questions MUST have more than one answer and answers must be A, B, C, and/or D.");
+                    //    }
+                    //}
+
+
+                    //maybe should be CheckboxQuestion.GetAnswer()?
+                    newCheckboxQuestion.CorrectAnswer = newCheckboxQuestion.GetAnswer();
                     Questions.Add(newCheckboxQuestion);
 
                     InitialPrompt();
                 }
 
-                
+                if (input.Equals("3"))
+                {
+                    Console.WriteLine("This functionality does not yet exist");
+
+                    InitialPrompt();
+                }
             }
         }
     }
